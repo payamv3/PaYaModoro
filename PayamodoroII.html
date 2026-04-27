@@ -7,7 +7,7 @@
         :root {
             --bg: #fdfdfd;
             --text: #1a1a1a;
-            --accent: #8b0000; /* Deep Red for focus */
+            --accent: #8b0000;
         }
 
         body, html {
@@ -19,7 +19,6 @@
             user-select: none; -webkit-tap-highlight-color: transparent;
         }
 
-        /* The scrolling container */
         #picker {
             height: 300px; width: 200px;
             overflow-y: scroll;
@@ -40,7 +39,6 @@
         }
         .minute.active { opacity: 1; }
 
-        /* The indicator frame */
         .frame {
             position: absolute;
             width: 240px; height: 102px;
@@ -50,7 +48,6 @@
             transition: all 0.5s ease;
         }
 
-        /* Countdown state */
         .running .frame { border-color: var(--accent); width: 280px; }
         .running .minute:not(.active) { visibility: hidden; }
         .running #picker { overflow: hidden; }
@@ -62,7 +59,7 @@
         }
     </style>
 </head>
-<body onclick="initAudio()">
+<body>
 
     <div class="frame"></div>
     <div id="picker"></div>
@@ -77,7 +74,6 @@
         let selectedMins = 25;
         let lastIndex = 25;
 
-        // Create the numbers 0-60
         for (let i = -1; i <= 61; i++) {
             const div = document.createElement('div');
             div.className = 'minute';
@@ -94,8 +90,14 @@
             }
         }
 
+        // Initialize audio on user gestures that qualify (pointer/touch/mouse down)
+        // These fire BEFORE scroll events, so audio is ready when scrolling begins.
+        ['pointerdown', 'touchstart', 'mousedown'].forEach(evt => {
+            document.addEventListener(evt, initAudio, { once: true });
+        });
+
         function playMechanicalTick() {
-            if (!audioCtx) return;
+            if (!audioCtx || audioCtx.state !== 'running') return;
             const t = audioCtx.currentTime;
             
             const noise = audioCtx.createBufferSource();
@@ -133,7 +135,6 @@
             if (!audioCtx) return;
             const t = audioCtx.currentTime;
             
-            // A rich, harmonic bell sound (Frequencies: 300Hz, 600Hz, 900Hz)
             [300, 600, 900].forEach((freq, i) => {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
@@ -154,8 +155,7 @@
             const index = Math.round(picker.scrollTop / 100);
             
             if (index !== lastIndex && index >= 0 && index <= 60) {
-                initAudio();
-                playMechanicalTick(); // Click sound while scrolling
+                playMechanicalTick();
                 lastIndex = index;
             }
 
