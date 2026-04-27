@@ -191,13 +191,8 @@
 
                 if (totalSeconds <= 0) {
                     clearInterval(timer);
-                    playLoudChime(); // Play the chime
-                    
-                    // We use a small timeout so the chime starts BEFORE the alert freezes the browser
-                    setTimeout(() => {
-                        alert("Time is up.");
-                        stopTimer();
-                    }, 100);
+                    playLoudChime(); 
+                    stopTimer();
                 }
             }, 1000);
         }
